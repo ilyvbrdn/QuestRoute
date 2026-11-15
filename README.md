@@ -17,5 +17,7 @@ Built for WoW Forever (Classic+), works alongside Questie and OpenMap
 | Route across Kalimdor: walk, fly, walk to the quest | Leading to the right boat dock in Menethil Harbor |
 | ![The route on the minimap, with the minimap button's tooltip](screenshots/minimap-route.png) | ![The WoW-style gold compass](screenshots/compass-gold.png) |
 | The route on the minimap, plus the minimap button | WoW Gold compass with the next step |
-| ![The bar compass with a danger warning](screenshots/compass-bar.png) | |
-| Bar compass, warning about a high-level area on the way | |
+| ![The bar compass with a danger warning](screenshots/compass-bar.png) | ![The WoW Gold line theme in Hillsbrad, with the boat crossing](screenshots/worldmap-hillsbrad-gold.webp) |
+| Bar compass, warning about a high-level area on the way | WoW Gold line theme: road to the flight master, then the boat |
+| ![The Arrow settings tab](screenshots/settings-arrow.webp) | |
+| Settings: arrow shape, colours and size | |
