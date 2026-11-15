@@ -1,0 +1,8 @@
+<Bindings>
+    <Binding name="QUESTROUTE_TOGGLE" header="QUESTROUTE">
+        QuestRoute_ToggleRoute()
+    </Binding>
+    <Binding name="QUESTROUTE_COMPASS">
+        QuestRoute_ToggleCompass()
+    </Binding>
+</Bindings>

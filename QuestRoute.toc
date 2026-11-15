@@ -1,0 +1,25 @@
+## Interface: 16001
+## Title: QuestRoute
+## Notes: Click a quest and get a route line on your map and minimap, plus a compass arrow pointing the way.
+## Version: 0.8.2
+## Dependencies: Questie
+## OptionalDeps: OpenMap
+## SavedVariables: QuestRouteDB
+## SavedVariablesPerCharacter: QuestRouteCharDB
+## IconTexture: Interface\Icons\INV_Misc_Map_01
+
+Core.lua
+Data\Flights.lua
+Data\FlightLegs.lua
+Data\Transports.lua
+Data\Dungeons.lua
+Data\NavEK.lua
+Data\NavKalimdor.lua
+Lines.lua
+Nav.lua
+Learn.lua
+Route.lua
+WorldMap.lua
+Minimap.lua
+Compass.lua
+Options.lua
