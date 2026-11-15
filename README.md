@@ -19,5 +19,11 @@ Built for WoW Forever (Classic+), works alongside Questie and OpenMap
 | The route on the minimap, plus the minimap button | WoW Gold compass with the next step |
 | ![The bar compass with a danger warning](screenshots/compass-bar.png) | ![The WoW Gold line theme in Hillsbrad, with the boat crossing](screenshots/worldmap-hillsbrad-gold.webp) |
 | Bar compass, warning about a high-level area on the way | WoW Gold line theme: road to the flight master, then the boat |
-| ![The Arrow settings tab](screenshots/settings-arrow.webp) | |
-| Settings: arrow shape, colours and size | |
+| ![The waypoint button and coordinate box on the world map](screenshots/worldmap-waypoint-button.webp) | ![Moving the compass in Edit Mode](screenshots/edit-mode.webp) |
+| Waypoint button and "Go to" coordinate box on the world map | Move the compass in Edit Mode, with snapping |
+
+### Settings
+
+| General | Line | Compass | Arrow |
+|---|---|---|---|
+| ![General settings](screenshots/settings-general.webp) | ![Line settings](screenshots/settings-line.webp) | ![Compass settings](screenshots/settings-compass.webp) | ![Arrow settings](screenshots/settings-arrow.webp) |
