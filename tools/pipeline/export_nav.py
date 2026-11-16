@@ -2,7 +2,7 @@ import pickle, numpy as np, sqlite3, re
 nav = pickle.load(open("nav_v4.pkl", "rb"))
 c = sqlite3.connect("vdb/sqlite-dump/mangos.sqlite")
 tn = {r[0]: (r[1], r[2], r[3]) for r in c.execute("select id, map_id, x, y from taxi_nodes")}
-fd = open("/home/user/QuestRoute/Data/Flights.lua").read()
+fd = open("/home/user/questroute/Data/Flights.lua").read()
 ours = {int(m[0]): (int(m[1]), float(m[2]), float(m[3])) for m in re.findall(r'id = (\d+), name = "[^"]*", fac = \d+, cont = (\d+), x = ([\d.-]+), y = ([\d.-]+)', fd)}
 B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 def enc3(v):
@@ -19,7 +19,7 @@ for mapid, cont, fname in ((0, 1415, "NavEK"), (1, 1414, "NavKalimdor")):
     qx = np.round((cx + OFF) * SCALE).astype(int); qy = np.round((cy + OFF) * SCALE).astype(int)
     nodes = "".join(enc3(a) + enc3(b) for a, b in zip(qx, qy))
     edges = "".join(enc3(int(a)) + enc3(int(b)) + B64[int(r)] for (a, b), r in zip(N["pairs"], N["road"]))
-    with open(f"/home/user/QuestRoute/Data/{fname}.lua", "w") as f:
+    with open(f"/home/user/questroute/Data/{fname}.lua", "w") as f:
         f.write(f"-- Walkable-ground network for continent map {cont}: {len(S)} points, {len(N['pairs'])} links.\n")
         f.write("-- Built from the VMaNGOS classic world database (creature and object spawns, guard patrol routes);\n")
         f.write("-- see Data/NAV_README.txt. Coordinates are continent map coordinates, base64-packed.\n-- levels: typical level of the hostile monsters around each point (0 = none).\n")

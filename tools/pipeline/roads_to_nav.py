@@ -3,7 +3,11 @@ import pickle, numpy as np
 from scipy.spatial import cKDTree
 from skimage.morphology import skeletonize, binary_dilation, disk
 nav=pickle.load(open("nav_v4.pkl","rb")); full=pickle.load(open("nav_v4_full.pkl","rb"))
-traced={0:pickle.load(open("traced.pkl","rb"))[0], 1:pickle.load(open("traced_1.pkl","rb"))[1]}; cal=pickle.load(open("imgcal5.pkl","rb"))
+import os
+traced={0:pickle.load(open("traced.pkl","rb"))[0], 1:pickle.load(open("traced_1.pkl","rb"))[1]}
+for m in (0,1):
+    f="traced_dbl_%d.pkl" % m
+    if os.path.exists(f): traced[m]=traced[m]+pickle.load(open(f,"rb"))[m]   # (both tracings: the filter picks); cal=pickle.load(open("imgcal5.pkl","rb"))
 r2shape=np.load("land2.npy").shape
 DS=2
 def toserver(m,X,Y):
@@ -14,6 +18,8 @@ RMIN,DMAX=float(sys.argv[1]),float(sys.argv[2])
 ALL_ROADS=len(sys.argv)>3 and sys.argv[3]=='all'
 r2=np.load("road_r2.npy").astype(np.float32); land2=np.load("land2.npy")
 BL=np.load("blu2.npy").astype(np.float32)
+BD=np.load("road_dbl2.npy").astype(np.float32)
+BMIN=float(os.environ.get("BMIN","0.45"))
 base_nav=pickle.load(open("nav_v4_before_roads.pkl","rb"))
 rn=np.clip(r2/np.percentile(r2[land2],98),0,1); DD=np.load("darkdens2.npy").astype(np.float32)
 for m in (0,1):
@@ -31,7 +37,8 @@ for m in (0,1):
         k=np.ones(15)/15
         rm=np.convolve(rn[path[:,0],path[:,1]],k,"same"); dm=np.convolve(DD[path[:,0],path[:,1]],k,"same")
         bm=np.convolve(BL[path[:,0],path[:,1]],k,"same")
-        good=(rm>=RMIN)&(dm<=DMAX)&(bm<0.2)
+        bdm=np.convolve(BD[path[:,0],path[:,1]],k,"same")
+        good=((rm>=RMIN)&(dm<=DMAX)&(bm<0.2)) | ((bdm>=BMIN)&(bm<0.2))   # a bright road, or a drawn double-line road
         # fill short gaps that are still fairly road-like
         n=len(good); t=0
         while t<n:

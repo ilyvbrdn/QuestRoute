@@ -533,5 +533,16 @@ local before = notified
 assert(ns.route, "route never arrived")
 print(("route ready after %d frames; map told %d time(s)"):format(frames, notified))
 assert(notified > 0, "the map was never told about the new route")
+-- in a cave (micro map) or a dungeon the route is paused; outside it's back
+local oldInfo, oldBest = _G.C_Map.GetMapInfo, _G.C_Map.GetBestMapForUnit
+_G.C_Map.GetBestMapForUnit = function() return 9999 end
+_G.C_Map.GetMapInfo = function(id) if id == 9999 then return { name = "Cave", mapType = 5 } end return oldInfo(id) end
+tick(1)
+assert(ns.target and not ns:RouteActive(), "route should pause in a cave")
+_G.IsInInstance = function() return true, "party" end; _G.C_Map.GetMapInfo = oldInfo; _G.C_Map.GetBestMapForUnit = oldBest
+tick(1); assert(not ns:RouteActive(), "route should pause in a dungeon")
+_G.IsInInstance = function() return false, "none" end
+tick(1); assert(ns:RouteActive(), "route should come back outside")
+print("pause in caves and dungeons ok")
 assert(ns.HBD == HBD and ns.HBDPins == Pins, "libs not found via Questie")
 print("ALL OK")

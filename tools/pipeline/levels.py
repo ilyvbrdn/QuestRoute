@@ -11,15 +11,19 @@ side = {}
 for e, fac, lmax in c.execute("select entry, faction, level_max from creature_template"):
     side[e] = ("H" if fac in HORDE_F else "A" if fac in ALLY_F else None, lmax or 0)
 tmpl = {}
-for e, name, lmin, lmax, fac, npcf, rank in c.execute("select entry, name, level_min, level_max, faction, npc_flags, rank from creature_template"):
-    hostile = npcf == 0 and fac not in FRIENDLY and not GUARD.search(name or "") and (lmax or 0) > 1
+# spawns that only appear during holidays and events don't make an area dangerous
+event_guids = set(r[0] for r in c.execute("select guid from game_event_creature"))
+for e, name, lmin, lmax, fac, npcf, rank, ctype in c.execute("select entry, name, level_min, level_max, faction, npc_flags, rank, type from creature_template"):
+    # not counted: invisible effect spawns (type 10, 'not specified'), lone rares (rank 2/4: one wandering creature)
+    hostile = (npcf == 0 and fac not in FRIENDLY and not GUARD.search(name or "") and (lmax or 0) > 1
+               and ctype != 10 and rank not in (2, 4))
     tmpl[e] = ((lmin + lmax) / 2 + (3 if rank in (1, 2, 4) else 0)) if hostile else None
 nav = pickle.load(open("nav_v4.pkl", "rb"))
 for m in (0, 1):
     pts, lv = [], []
-    for cid, x, y in c.execute("select id, position_x, position_y from creature where map=?", (m,)):
+    for guid, cid, x, y in c.execute("select guid, id, position_x, position_y from creature where map=?", (m,)):
         L = tmpl.get(cid)
-        if L: pts.append((x, y)); lv.append(L)
+        if L and guid not in event_guids: pts.append((x, y)); lv.append(L)
     tree = cKDTree(np.array(pts)); lv = np.array(lv)
     S = nav[m]["S"]
     out = np.zeros(len(S), int)
@@ -29,9 +33,9 @@ for m in (0, 1):
     # the other faction's guards and towns are deadly: max level of their NPCs within 80 yd
     for tag, other in (("lvlA", "H"), ("lvlH", "A")):
         fp, fl = [], []
-        for cid, x, y in c.execute("select id, position_x, position_y from creature where map=?", (m,)):
+        for guid, cid, x, y in c.execute("select guid, id, position_x, position_y from creature where map=?", (m,)):
             sd, lv_ = side.get(cid, (None, 0))
-            if sd == other: fp.append((x, y)); fl.append(lv_)
+            if sd == other and guid not in event_guids: fp.append((x, y)); fl.append(lv_)
         arr = out.copy()
         if fp:
             ft = cKDTree(np.array(fp)); fl = np.array(fl)

@@ -635,7 +635,7 @@ end
 
 -- Drive the planning coroutine: as much as fits in a few milliseconds each frame, so a route
 -- appears quickly without stuttering the game.
-local BUDGET_MS = 6
+local BUDGET_MS = 3
 local clock = debugprofilestop
 local plannerTarget
 local driver = CreateFrame("Frame")
@@ -702,8 +702,28 @@ function R:Update()
         local switched = not lastTarget or lastTarget.questId ~= t.questId or lastTarget.custom ~= t.custom
             or lastTarget.corpse ~= t.corpse
         if switched then ns.route, ns.waypoint = nil, nil end
-        local moved = not lastPlanX or d2(px, py, lastPlanX, lastPlanY) > 30
-        if t ~= lastTarget or moved or now - lastPlanTime > 5 or ns.forceReplan then
+        -- replan only when needed: a new destination, you've left the route, or now and then
+        -- (walking along the route doesn't need a new plan: the line starts where you stand)
+        local offRoute = not ns.route
+        if ns.route and pinst then
+            local best = huge
+            local stops = ns.route.stops
+            local ax, ay, ai = lastPlanX, lastPlanY, pinst
+            for k = 1, #stops do
+                local s = stops[k]
+                if s.inst == pinst and ai == pinst and ax then
+                    -- distance from you to the segment (ax,ay)-(s)
+                    local dx, dy = s.wx - ax, s.wy - ay
+                    local l2 = dx * dx + dy * dy
+                    local u = l2 > 0 and math.max(0, math.min(1, ((px - ax) * dx + (py - ay) * dy) / l2)) or 0
+                    local d = d2(px, py, ax + dx * u, ay + dy * u)
+                    if d < best then best = d end
+                end
+                ax, ay, ai = s.wx, s.wy, s.inst
+            end
+            offRoute = best > 50
+        end
+        if t ~= lastTarget or offRoute or now - lastPlanTime > 20 or ns.forceReplan then
             lastPlanX, lastPlanY, lastPlanTime, lastTarget = px, py, now, t
             ns.forceReplan = false
             maybeTip(px, py, pinst, t)
