@@ -635,7 +635,7 @@ end
 
 -- Drive the planning coroutine: as much as fits in a few milliseconds each frame, so a route
 -- appears quickly without stuttering the game.
-local BUDGET_MS = 3
+local BUDGET_MS = 5
 local clock = debugprofilestop
 local plannerTarget
 local driver = CreateFrame("Frame")
