@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: QuestRoute
 ## Notes: Click a quest and get a route line on your map and minimap, plus a compass arrow pointing the way.
-## Version: 0.8.2
+## Version: 0.8.3
 ## Dependencies: Questie
 ## OptionalDeps: OpenMap
 ## SavedVariables: QuestRouteDB

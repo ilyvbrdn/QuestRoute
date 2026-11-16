@@ -249,6 +249,10 @@ local function update()
             sub:SetText("Click a quest in your quest log")
             info:SetText("")
         end
+    elseif t and ns:RoutePaused() then
+        title:SetText(t.title)
+        sub:SetText("|cff999999Route paused inside here|r")
+        info:SetText("|cff999999It comes back when you're outside|r")
     elseif not t then
         title:SetText(C_QuestLog.GetTitleForQuestID and C_QuestLog.GetTitleForQuestID(ns.questId) or "Quest")
         sub:SetText("|cffff8040No location known for this quest|r")
@@ -288,6 +292,7 @@ local function update()
             arrived = true
             info:SetText("|cff60ff60You have arrived|r")
         else
+            if wp and wp.pathDist and wp.pathDist > dist then dist = wp.pathDist end -- (along the route)
             local text = ("%d yd"):format(dist)
             local speed = GetUnitSpeed("player")
             if db.showTimes and speed and speed > 0 then

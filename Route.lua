@@ -760,10 +760,30 @@ function R:UpdateWaypoint()
         end
     end
 
+    -- the arrow: by default it points at the end of this leg (the quest, or the dock or flight master
+    -- you take first), steady, rather than at a spot down the road that swings round every bend
+    if not ns.db.arrowFollowsRoad then
+        aim = #route.stops
+        for j = i, #route.stops do
+            local st = route.stops[j]
+            if st.inst ~= pinst then break end
+            aim = j
+            if not st.road and route.stops[j + 1] and TRAVEL[route.stops[j + 1].kind] then break end
+        end
+        if riding then aim = i end
+    end
+    -- walking distance along the route to that point
+    local pathDist, qx, qy = 0, px, py
+    for j = i, aim do
+        local st = route.stops[j]
+        if st.inst ~= pinst then break end
+        pathDist = pathDist + d2(qx, qy, st.wx, st.wy)
+        qx, qy = st.wx, st.wy
+    end
     local a = route.stops[aim]
     ns.waypoint = {
         wx = a.wx, wy = a.wy, inst = a.inst, name = a.name, text = text,
-        index = i, final = (aim == #route.stops),
+        index = i, final = (aim == #route.stops), pathDist = (not riding) and pathDist or nil,
     }
 end
 

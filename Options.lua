@@ -472,7 +472,11 @@ local function buildArrowTab(page, db)
     header(page, "Arrow shape", y); y = y - 22
     choice(page, 20, y, 112, { { "arrow", "Arrow" }, { "chevron", "Chevron" }, { "needle", "Needle" } },
         function() return db.arrowStyle end, function(v) db.arrowStyle = v end)
-    y = y - 40
+    y = y - 34
+    checkbox(page, "Follow every bend of the road", 20, y, function() return db.arrowFollowsRoad end,
+        function(v) db.arrowFollowsRoad = v end,
+        "Off: the arrow points steadily at the quest (or the dock or flight master you take first). On: it points a little way down the road and turns with it.")
+    y = y - 36
 
     header(page, "Arrow color", y); y = y - 20
     local tinted = function() return db.arrowStyle ~= "needle" end

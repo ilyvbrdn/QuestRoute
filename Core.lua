@@ -45,6 +45,7 @@ local defaults = {
     compassOpacity = 0.9,
     arrowUseLineColor = true,
     arrowColor = { r = 1, g = 0.78, b = 0.18 },
+    arrowFollowsRoad = false, -- false: point at the end of the leg; true: at a spot just down the road
     arrowScale = 1,
     arrowOpacity = 1,
     arrivedColor = { r = 0.3, g = 1, b = 0.3 },
@@ -630,8 +631,31 @@ ns.flyDb = setmetatable({}, { __index = function(_, k)
     return ns.db[k]
 end })
 
+-- In a dungeon, raid or battleground, or in a cave or tunnel (the game shows its own small map
+-- there), the route can't be drawn sensibly: it's paused until you're back outside.
+local pausedAt, pausedValue = -1, false
+function ns:RoutePaused()
+    local now = GetTime and GetTime() or 0
+    if now - pausedAt < 0.5 then return pausedValue end
+    pausedAt = now
+    local paused = false
+    if IsInInstance then
+        local inside, kind = IsInInstance()
+        if inside and kind ~= "none" then paused = true end
+    end
+    if not paused and C_Map and C_Map.GetBestMapForUnit and C_Map.GetMapInfo then
+        local m = C_Map.GetBestMapForUnit("player")
+        local info = m and C_Map.GetMapInfo(m)
+        local t = info and info.mapType
+        -- (4: a dungeon map, 5: a micro map such as a cave; cities and buildings are zone maps)
+        if t == 4 or t == 5 then paused = true end
+    end
+    pausedValue = paused
+    return paused
+end
+
 function ns:RouteActive()
-    return self.db and self.db.enabled and self.target ~= nil
+    return self.db and self.db.enabled and self.target ~= nil and not self:RoutePaused()
 end
 
 ---------------------------------------------------------------------------
