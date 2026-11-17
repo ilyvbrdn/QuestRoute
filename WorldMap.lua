@@ -1,5 +1,6 @@
 -- QuestRoute: route line on the world map, plus an on/off button on the map.
 local _, ns = ...
+local CreateFrame = ns.CreateFrame -- (protected scripts: see Core.lua)
 
 local holder, surface, button
 local FRAME_INTERVAL = 1 / 30

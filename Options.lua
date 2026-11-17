@@ -1,5 +1,6 @@
 -- QuestRoute: settings window (two tabs) with live previews.
 local _, ns = ...
+local CreateFrame = ns.CreateFrame -- (protected scripts: see Core.lua)
 
 local win
 local refreshers = {}

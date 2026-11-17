@@ -5,6 +5,7 @@
 --    boarding and landing spots are saved as a transport link.
 -- Everything is stored account-wide in QuestRouteDB.roads / QuestRouteDB.transports.
 local _, ns = ...
+local CreateFrame = ns.CreateFrame -- (protected scripts: see Core.lua)
 local L = {}
 ns.Learn = L
 

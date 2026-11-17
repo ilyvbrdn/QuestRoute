@@ -96,12 +96,53 @@ end
 -- Change notifications: displays register a callback and get poked when
 -- the target or settings change.
 ---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+-- Errors: every QuestRoute handler runs protected. An error is saved (with how often it
+-- happened) and mentioned once in chat, never thrown at the game frame after frame.
+---------------------------------------------------------------------------
+local seenErrors, errorNoticed = {}, false
+function ns:ReportError(err)
+    err = tostring(err)
+    local e = seenErrors[err]
+    if e then e.count = e.count + 1 return end
+    e = { msg = err, count = 1, time = date and date("%Y-%m-%d %H:%M") or "",
+          version = (C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata or function() end)(ADDON, "Version") }
+    seenErrors[err] = e
+    if QuestRouteDB then
+        QuestRouteDB.errors = QuestRouteDB.errors or {}
+        local list = QuestRouteDB.errors
+        if #list >= 20 then table.remove(list, 1) end
+        list[#list + 1] = e
+    end
+    if not errorNoticed and DEFAULT_CHAT_FRAME then
+        errorNoticed = true
+        DEFAULT_CHAT_FRAME:AddMessage("|cffffc72eQuestRoute:|r |cffff6040hit an error and skipped it.|r Type /qroute errors to see it (it's saved for the developer).")
+    end
+end
+-- CreateFrame for QuestRoute's own files: scripts set on these frames are protected
+local rawCreateFrame = CreateFrame
+function ns.CreateFrame(...)
+    local f = rawCreateFrame(...)
+    local rawSet, rawHook = f.SetScript, f.HookScript
+    local function guard(fn)
+        if type(fn) ~= "function" then return fn end
+        return function(...)
+            local ok, err = pcall(fn, ...)
+            if not ok then ns:ReportError(err) end
+        end
+    end
+    f.SetScript = function(self, what, fn) return rawSet(self, what, guard(fn)) end
+    if rawHook then f.HookScript = function(self, what, fn) return rawHook(self, what, guard(fn)) end end
+    return f
+end
+local CreateFrame = ns.CreateFrame
+
 ns.listeners = {}
 function ns:OnChange(fn) table.insert(self.listeners, fn) end
 function ns:NotifyChanged()
     for _, fn in ipairs(self.listeners) do
         local ok, err = pcall(fn)
-        if not ok then geterrorhandler()(err) end
+        if not ok then ns:ReportError(err) end
     end
 end
 
@@ -1016,6 +1057,16 @@ SlashCmdList.QUESTROUTE = function(msg)
         ns.db.compassPos = nil
         ns:NotifyChanged()
         ns:Print("compass position reset")
+    elseif msg == "errors" then
+        local list = QuestRouteDB.errors or {}
+        if #list == 0 then ns:Print("no errors recorded.") end
+        for i, e in ipairs(list) do
+            ns:Print(("|cffff6040#%d|r (%s, v%s, x%d): %s"):format(i, e.time or "?", tostring(e.version), e.count or 1, e.msg))
+        end
+        if #list > 0 then ns:Print("(saved in WTF\\Account\\<account>\\SavedVariables\\QuestRoute.lua; /qroute errors clear to empty)") end
+    elseif msg == "errors clear" then
+        QuestRouteDB.errors = {}
+        ns:Print("error list cleared.")
     elseif msg == "debug" then
         ns:Diagnose()
     elseif msg == "flights" then

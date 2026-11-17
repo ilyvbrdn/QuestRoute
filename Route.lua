@@ -7,6 +7,7 @@
 -- Output: ns.route = { stops = { {wx, wy, inst, name, kind, road, special}, ... }, total = seconds }
 -- Each stop's "kind" is how you travel TO it: "walk", "fly", "boat", "zeppelin", "tram", "ferry".
 local _, ns = ...
+local CreateFrame = ns.CreateFrame -- (protected scripts: see Core.lua)
 local R = {}
 ns.Route = R
 
@@ -655,7 +656,8 @@ driver:SetScript("OnUpdate", function(self)
                 R:UpdateWaypoint()
             else
                 ns.lastPlanError = res
-                geterrorhandler()(res)
+                ns.planFailedAt = GetTime()
+                ns:ReportError(res)
             end
             ns:NotifyChanged() -- the map, minimap and compass draw the new route now
             return
@@ -723,7 +725,9 @@ function R:Update()
             end
             offRoute = best > 50
         end
-        if t ~= lastTarget or offRoute or now - lastPlanTime > 20 or ns.forceReplan then
+        -- (a plan that failed is not retried for 10 s: no error flood)
+        local backoff = ns.planFailedAt and now - ns.planFailedAt < 10 and t == lastTarget
+        if not backoff and (t ~= lastTarget or offRoute or now - lastPlanTime > 20 or ns.forceReplan) then
             lastPlanX, lastPlanY, lastPlanTime, lastTarget = px, py, now, t
             ns.forceReplan = false
             maybeTip(px, py, pinst, t)

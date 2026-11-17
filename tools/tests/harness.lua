@@ -544,5 +544,18 @@ tick(1); assert(not ns:RouteActive(), "route should pause in a dungeon")
 _G.IsInInstance = function() return false, "none" end
 tick(1); assert(ns:RouteActive(), "route should come back outside")
 print("pause in caves and dungeons ok")
+-- a handler that keeps failing: caught, saved once (with a count), never thrown at the game
+local thrown = 0
+local oldHandler = _G.geterrorhandler
+_G.geterrorhandler = function() return function() thrown = thrown + 1 end end
+local bad = ns.CreateFrame("Frame")
+bad:SetScript("OnUpdate", function() error("test failure") end)
+for i = 1, 50 do tick(0.016) end
+local saved = QuestRouteDB.errors and QuestRouteDB.errors[#QuestRouteDB.errors]
+assert(saved and saved.msg:find("test failure") and saved.count >= 50, "error not saved with its count")
+assert(thrown == 0, "errors reached the game's error handler " .. thrown .. " times")
+bad:SetScript("OnUpdate", nil); _G.geterrorhandler = oldHandler
+SlashCmdList.QUESTROUTE("errors")
+print("errors contained ok: saved once, counted " .. saved.count .. " times")
 assert(ns.HBD == HBD and ns.HBDPins == Pins, "libs not found via Questie")
 print("ALL OK")

@@ -2,6 +2,7 @@
 -- Styles: gold ring (WoW-like), modern ring, horizontal bar, or arrow only.
 -- The arrow can sit inside the compass, above it or below it.
 local _, ns = ...
+local CreateFrame = ns.CreateFrame -- (protected scripts: see Core.lua)
 
 local DIAL = 110
 local BAR_W, BAR_H = 300, 34

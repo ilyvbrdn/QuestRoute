@@ -1,5 +1,6 @@
 -- QuestRoute: route line on the minimap, plus the minimap on/off button.
 local ADDON, ns = ...
+local CreateFrame = ns.CreateFrame -- (protected scripts: see Core.lua)
 
 local holder, surface
 local INTERVAL = 1 / 30
